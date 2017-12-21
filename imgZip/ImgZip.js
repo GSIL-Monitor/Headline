@@ -1,5 +1,5 @@
 /**
- *
+ * 压缩图片
  * User: heliang
  * Date: 2017/9/8.
  */
@@ -7,9 +7,9 @@ var fs=require("fs");
 var tinify = require("tinify");
 var path=require("path");
 var sourceImgPath=path.join(__dirname,"/../zipImg/source/");
-var keys=['rNQufiIPg_jdO6I5teGVMhYvXPkGduTj','4scr4C-HHwqw2QJOENmWpXgX5u-TmLR6','EKq-1HZgmSGYu1P8dEcxDJbQgfN0autu'];
+var keys=['4scr4C-HHwqw2QJOENmWpXgX5u-TmLR6','EKq-1HZgmSGYu1P8dEcxDJbQgfN0autu']; //,'4scr4C-HHwqw2QJOENmWpXgX5u-TmLR6','EKq-1HZgmSGYu1P8dEcxDJbQgfN0autu'
 // var distImgPath=path.join(__dirname,"/../zipImg/dist/");
-tinify.key = "rNQufiIPg_jdO6I5teGVMhYvXPkGduTj";
+tinify.key = "4scr4C-HHwqw2QJOENmWpXgX5u-TmLR6";
 
 var counter=0;
 var c=0;
@@ -19,26 +19,27 @@ function zipImg(){
 }
 
 function zip(filepath,newPath,filename){
-    setTimeout(function () {
-        tinify.fromFile(filepath).toFile(newPath,function (err) {
-            console.log("定时...."+c);
-            c++;
-            console.log("处理第"+c+"张图片");
-            if(c%490==0){ //490的倍数
-                let index=parseInt(c/490);
-                tinify.key =keys[index];
-                console.log("换key>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-            }
-            if(err){
-                console.log("压缩出错%s",err.message);
-                console.log("key>>>>>>>>>>>>>>>"+JSON.stringify(tinify));
-            }else{
-                console.log("压缩[%s]完成",filename);
+    if(filename.indexOf('.png')>-1||filename.indexOf('.jpg')>-1){
+        setTimeout(function () {
+            tinify.fromFile(filepath).toFile(newPath,function (err) {
+                // console.log("定时...."+c);
+                c++;
+                console.log("处理第"+c+"张图片[%s]",filename);
+                if(c%490==0){ //490的倍数
+                    let index=parseInt(c/490);
+                    tinify.key =keys[index];
+                    console.log("换key>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                }
+                if(err){
+                    console.log("压缩出错%s",err.message);
+                    console.log("key>>>>>>>>>>>>>>>"+JSON.stringify(tinify));
+                }else{
+                    console.log("压缩[%s]完成",filename);
 
-            }
-        });
-    },counter*300)
-
+                }
+            });
+        },counter*300)
+    }
 }
 
 function copeToTargetDir(filepath){
