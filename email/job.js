@@ -145,6 +145,8 @@ function startUp() {
 // startUp();
 
 // copyFile(templateDir);
-sendJinRiEmail();
+// sendJinRiEmail();
 // sendWeeklyEmail();
+
+module.exports=startUp;
 

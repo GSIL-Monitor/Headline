@@ -6,6 +6,8 @@
 
 var Imap=require("imap");
 var MailParser=require("mailparser").MailParser;
+var fs=require("fs");
+var path=require("path");
 
 var imap=new Imap({
     user:'heliang@duyao001.com',
@@ -28,20 +30,14 @@ imap.once('ready',function () {
             //     bodies: 'HEADER',
             //     struct: true
             // });
-            imap.search(['SEEN'], function(err, results) {//搜寻2017-05-20以后未读的邮件
-
+            imap.search(['ALL'], function(err, results) {//搜寻所有邮件
                 if (err) throw err;
-
-                var f = imap.fetch(results, {bodies: ''});//抓取邮件（默认情况下邮件服务器
-
-
+                var f = imap.fetch(results, {bodies: ''});//抓取邮件
+                console.log("连接邮箱....");
                 f.on('message', function (msg, seqno) {
                     var mailparser = new MailParser();
-
                     msg.on('body', function (stream, info) {
-
                         stream.pipe(mailparser);
-
                         var mailTitle="";
                         mailparser.on("headers", function (headers) {
                             mailTitle=headers.get('subject');
@@ -54,6 +50,15 @@ imap.once('ready',function () {
                         mailparser.on('data', function (data) {
                             if (data.type === 'text') {//邮件正文
                                 // console.log("邮件内容: " + data.html);
+                                var content=data.html.replace("charset=GB2312","charset=UTF-8");
+
+                                fs.writeFile(path.join(__dirname,"/../email-files/"+mailTitle+".html"),content,{
+                                    encoding: 'utf8'
+                                })
+                            }
+                            if(data.type=="attachment"){
+                                data.content.pipe(fs.createWriteStream(path.join(__dirname,"/../email-files/attachments/"+data.filename)));//保存附件到当前目录下
+                                data.release();
                             }
                         })
                         mailparser.on('error', function (err) {
@@ -64,14 +69,14 @@ imap.once('ready',function () {
                         })
 
                     })
-                    msg.once('attributes', function () {
 
+                    msg.once('attributes', function (attrs) {
+
+                    // console.log("attributes>>>>"+JSON.stringify(attrs));
                     })
-
                     msg.once('end', function () {
-
+                      // console.log("messageEnd....");
                     })
-
 
                 })
 
